@@ -85,9 +85,9 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 				$styles = " style='";
 				$styles .= 'border-color:' . $config['borderColor'] . ";";
 				$styles .= 'background-color:' . $config['backgroundColor'] . ";";
-				$styles .= 'width:' . $config['containerWidth'] . "px;";
-				$styles .= 'height:' . $config['containerHeight'] . "px;";
-				$styles .= 'padding:' . $config['containerPadding'] . "px;'";
+				$styles .= 'width:' . $config['containerWidth'] . ";";
+				$styles .= 'height:' . $config['containerHeight'] . ";";
+				$styles .= 'padding:' . $config['containerPadding'] . ";'";
 
 				$thumb_url = '';
 				// if Pageimage field is of type cropimage (thumbnails module)
@@ -96,6 +96,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 						if($v instanceof Pageimages){
 							$thumb_url = $v->first()->getThumb($subfield);
 						} else $thumb_url = $v->getThumb($subfield);
+
 					}
 				} else {
 					$size = explode(",", $config['pageLabelImageSize']);
@@ -105,6 +106,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 						} else $thumb_url = $page->$field->size($size[0],$size[1])->url;
 					}
 				}
+				$thumb_url .= "?vt=" . time();
 				$v = "<span class='label-image'{$styles}><img src='".$thumb_url."'/></span>";
 			}
 			//$v = $page->get($field);
@@ -151,7 +153,8 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		$field->attr('size', 10);
 		$field->attr('value', $data['containerWidth']);
 		$field->label = "Container width";
-		$field->description = "Width of the container in css value";
+		$field->description = "Width of the container in css value (px,%,em...)";
+		$field->notes = "Example: 100px";
 		$fields->append($field);
 
 		$field = $modules->get("InputfieldText");
@@ -159,7 +162,8 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		$field->attr('size', 10);
 		$field->attr('value', $data['containerHeight']);
 		$field->label = "Container height";
-		$field->description = "Height of the container in css value";
+		$field->description = "Height of the container in css value (px,%,em...)";
+		$field->notes = "Example: 100px";
 		$fields->append($field);
 
 		$field = $modules->get("InputfieldText");
@@ -167,7 +171,8 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		$field->attr('size', 10);
 		$field->attr('value', $data['containerPadding']);
 		$field->label = "Container padding";
-		$field->description = "Padding of the container in css value";
+		$field->description = "Padding of the container in css value (px,%,em...)";
+		$field->notes = "Example: 10px";
 		$fields->append($field);
 
 		$field = $modules->get("InputfieldText");
