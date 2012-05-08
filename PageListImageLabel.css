@@ -1,0 +1,9 @@
+.label-image{
+	display:inline-block;
+	vertical-align:middle;
+	/*width:60px;
+	background-color:#444;
+	padding:5px;
+	border:1px solid #000;*/
+}
+.label-image img { display:block; margin:0 auto; }
