@@ -5,5 +5,7 @@
 	background-color:#444;
 	padding:5px;
 	border:1px solid #000;*/
+	/*color:#aaa;*/
 }
-.label-image img { display:block; margin:0 auto; }
+.label-image img,
+.label-image span { text-align:center; display:block; margin:0 auto; }
