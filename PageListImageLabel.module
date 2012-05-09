@@ -73,6 +73,8 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 
 		foreach($fields as $field) {
 
+			$is_thumb = false;
+
 			if(strpos($field, ".")) {
 				list($field, $subfield) = explode(".", $field); 
 			} else $subfield = '';
@@ -83,7 +85,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 			if(($v instanceof Pageimage) || ($v instanceof Pageimages)){
 				
 				$styles = " style='";
-				$styles .= 'border-color:' . $config['borderColor'] . ";";
+				$styles .= 'border: 1px solid ' . $config['borderColor'] . ";";
 				$styles .= 'background-color:' . $config['backgroundColor'] . ";";
 				$styles .= 'width:' . $config['containerWidth'] . ";";
 				$styles .= 'height:' . $config['containerHeight'] . ";";
@@ -107,6 +109,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 					}
 				}
 				$thumb_url .= "?vt=" . time();
+				$is_thumb = true;
 				$v = "<span class='label-image'{$styles}><img src='".$thumb_url."'/></span>";
 			}
 			//$v = $page->get($field);
@@ -119,10 +122,13 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 				$v = date($this->fuel('config')->dateFormat, (int) $v);
 			}
 
-			if($v) $value .= ($value ? ', ' : '') . "$v";
+			if($v) {
+				$value .= $is_thumb ? "$v " : "$v, ";
+			}
 		}
 
 		if(!strlen($value)) $value = $page->get("name");
+			else $value = substr($value,0,-2);
 
 		$value = strip_tags($value, '<img><span>');
 		//$value = htmlspecialchars($value, ENT_XHTML, "UTF-8", false); 
