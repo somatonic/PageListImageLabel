@@ -102,17 +102,14 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 
 				// if image field is of type cropimage (thumbnails module)
 				if($this->fields->get($field)->type == "FieldtypeCropImage"){
-					if(count($v) && $v instanceof Pageimages){
+					if(count($v)){
 						$thumb_url = $v->first()->getThumb($subfield);
-						$thumb_url = $v->url . $this->resizeThumb($v, $thumb_url, $size);
-					} else if(count($v)){
-						$thumb_url = $v->getThumb($subfield);
 						$thumb_url = $v->url . $this->resizeThumb($v, $thumb_url, $size);
 					}
 				} else { // all normal image fields
-					if(count($v) && $v instanceof Pageimages){
+					if(count($v)){
 						$thumb_url = $page->$field->first()->size($size[0],$size[1])->url;
-					} else if(count($v)) $thumb_url = $page->$field->size($size[0],$size[1])->url;
+					}
 				}
 				if($thumb_url){
 					$thumb_url .= "?vt=" . time();
