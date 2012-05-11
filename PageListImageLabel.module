@@ -56,6 +56,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		
 		$event->replace = true;
 		$page = $event->arguments('page');
+		$page->of(false);
 		//$event->return = $title;
 
 		$options = self::$defaults;
@@ -86,7 +87,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 			$v = $page->get($field);
 
 			// check for page image fields
-			if(($v instanceof Pageimage) || ($v instanceof Pageimages)){
+			if($v instanceof Pageimages){
 
 				$styles = " style='";
 				$styles .= 'border: 1px solid ' . $options['borderColor'] . ";";
@@ -97,20 +98,21 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 				$styles .= 'color:' . $options['textColor'] . ";'";
 
 				$thumb_url = '';
+				$size = explode(",", $options['pageLabelImageSize']);
+
 				// if image field is of type cropimage (thumbnails module)
 				if($this->fields->get($field)->type == "FieldtypeCropImage"){
-					if(count($v)){
-						if($v instanceof Pageimages){
-							$thumb_url = $v->first()->getThumb($subfield);
-						} else $thumb_url = $v->getThumb($subfield);
+					if(count($v) && $v instanceof Pageimages){
+						$thumb_url = $v->first()->getThumb($subfield);
+						$thumb_url = $v->url . $this->resizeThumb($v, $thumb_url, $size);
+					} else if(count($v)){
+						$thumb_url = $v->getThumb($subfield);
+						$thumb_url = $v->url . $this->resizeThumb($v, $thumb_url, $size);
 					}
-				} else {
-					$size = explode(",", $options['pageLabelImageSize']);
-					if(count($v)){
-						if($v instanceof Pageimages){
-							$thumb_url = $page->$field->first()->size($size[0],$size[1])->url;
-						} else $thumb_url = $page->$field->size($size[0],$size[1])->url;
-					}
+				} else { // all normal image fields
+					if(count($v) && $v instanceof Pageimages){
+						$thumb_url = $page->$field->first()->size($size[0],$size[1])->url;
+					} else if(count($v)) $thumb_url = $page->$field->size($size[0],$size[1])->url;
 				}
 				if($thumb_url){
 					$thumb_url .= "?vt=" . time();
@@ -142,6 +144,18 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		//$value = htmlspecialchars($value, ENT_XHTML, "UTF-8", false); 
 
 		$event->return = $value;
+	}
+
+	private function resizeThumb($field, $thumb_url, $size){
+		$thumb_path = $this->config->paths->root . $thumb_url;
+		$filename = $size[0] . "x" . $size[1] . "_" . basename($thumb_url);
+		$thumb_path_new = $field->path . $filename;
+		if(@copy($thumb_path, $thumb_path_new )){
+			$sizer = new ImageSizer($thumb_path_new); 
+			$sizer->resize(50,50);
+			return $filename;
+		} else return false;
+		
 	}
 
 	/**
