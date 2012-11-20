@@ -1,16 +1,16 @@
 <?php
 
 /**
- * PageListImageLabel 1.0.1 ProcessWire module
+ * PageListImageLabel 1.0.2 ProcessWire module
  *
  * @author Philipp "Soma" Urlich
  * @created 08/05/2012
- * @last_modified 11/05/2012
- * 
- * ProcessWire 2.x 
- * Copyright (C) 2010 by Ryan Cramer 
+ * @last_modified 20/11/2012
+ *
+ * ProcessWire 2.x
+ * Copyright (C) 2010 by Ryan Cramer
  * Licensed under GNU/GPL v2, see LICENSE.TXT
- * 
+ *
  * http://www.processwire.com
  * http://www.ryancramer.com
  *
@@ -41,7 +41,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 
 		return array(
 			'title' => 'Page List Image Label',
-			'version' => 101, 
+			'version' => 102,
 			'summary' => 'Adds an thumbnail as label for pages. To enable add an image field to a page and add that to the advanced page label options in the template settings. You can output an thumbnail (Thumbnail Module) using dot notation (fieldname.thumbnailname)',
 			'autoload' => true
 			);
@@ -51,9 +51,9 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		$this->config->styles->add($this->config->urls->PageListImageLabel . "PageListImageLabel.css");
 		$this->addHookBefore('ProcessPageListRender::getPageLabel', $this, 'addImageLabel');
 	}
-	
+
 	public function addImageLabel( HookEvent $event ) {
-		
+
 		$event->replace = true;
 		$page = $event->arguments('page');
 		$page->of(false);
@@ -66,14 +66,14 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 
 		$value = '';
 
-		// if the page's template specifies a pageLabelField, use that 
+		// if the page's template specifies a pageLabelField, use that
 		$pageLabelField = trim($page->template->pageLabelField);
 
 		// otherwise use the one specified with this instance
 		if(!strlen($pageLabelField)) $pageLabelField = $this->pageLabelField;
 
 		// convert to array
-		if(strpos($pageLabelField, ' ')) $fields = explode(' ', $pageLabelField); 
+		if(strpos($pageLabelField, ' ')) $fields = explode(' ', $pageLabelField);
 			else $fields = array($pageLabelField);
 
 		foreach($fields as $field) {
@@ -81,7 +81,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 			$has_thumb = false;
 
 			if(strpos($field, ".")) {
-				list($field, $subfield) = explode(".", $field); 
+				list($field, $subfield) = explode(".", $field);
 			} else $subfield = '';
 
 			$v = $page->get($field);
@@ -138,21 +138,22 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 			else $value = substr($value,0,-2);
 
 		$value = strip_tags($value, '<img><span>');
-		//$value = htmlspecialchars($value, ENT_XHTML, "UTF-8", false); 
+		//$value = htmlspecialchars($value, ENT_XHTML, "UTF-8", false);
 
 		$event->return = $value;
 	}
 
 	private function resizeThumb($field, $thumb_url, $size){
-		$thumb_path = $this->config->paths->root . $thumb_url;
+		$thumb_path = $field->path() . basename($thumb_url);
 		$filename = $size[0] . "x" . $size[1] . "_" . basename($thumb_url);
-		$thumb_path_new = $field->path . $filename;
-		if(@copy($thumb_path, $thumb_path_new )){
-			$sizer = new ImageSizer($thumb_path_new); 
+		$thumb_path_new = $field->path() . $filename;
+		// if already exists, no need to resize again
+		if(file_exists($thumb_path_new)) return $filename;
+		if(@copy($thumb_path, $thumb_path_new)){
+			$sizer = new ImageSizer($thumb_path_new);
 			$sizer->resize($size[0],$size[1]);
 			return $filename;
 		} else return false;
-		
 	}
 
 	/**
@@ -170,7 +171,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		$field->attr('name', 'pageLabelImageSize');
 		$field->attr('size', 10);
 		$field->attr('value', $data['pageLabelImageSize']);
-		$field->label = "Thumbnail size"; 
+		$field->label = "Thumbnail size";
 		$field->description = "Thumbnail size. Specify two number comma separated. Will be ignored if field is of type FieldtypeCropImage (thumbnail module).";
 		$field->notes = "Example: 100,100 or 0,50";
 		$fields->append($field);
@@ -206,7 +207,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		$field->attr('name', 'backgroundColor');
 		$field->attr('size', 10);
 		$field->attr('value', $data['backgroundColor']);
-		$field->label = "Container background color"; 
+		$field->label = "Container background color";
 		$field->description = "HEX background color of the container (#444)";
 		$fields->append($field);
 
@@ -214,7 +215,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		$field->attr('name', 'borderColor');
 		$field->attr('size', 10);
 		$field->attr('value', $data['borderColor']);
-		$field->label = "Container border color"; 
+		$field->label = "Container border color";
 		$field->description = "Border color of the container (#000)";
 		$fields->append($field);
 
@@ -222,7 +223,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		$field->attr('name', 'textColor');
 		$field->attr('size', 10);
 		$field->attr('value', $data['textColor']);
-		$field->label = "Text color"; 
+		$field->label = "Text color";
 		$field->description = "Text color of the container (#aaa)";
 		$fields->append($field);
 
@@ -230,7 +231,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		$field->attr('name', 'noImageText');
 		$field->attr('size', 10);
 		$field->attr('value', $data['noImageText']);
-		$field->label = "No-Image Text"; 
+		$field->label = "No-Image Text";
 		$field->description = "Text as placeholder if no image populated.";
 		$fields->append($field);
 
