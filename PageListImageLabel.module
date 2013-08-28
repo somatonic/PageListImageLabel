@@ -101,7 +101,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 				$size = explode(",", $options['pageLabelImageSize']);
 
 				// if image field is of type cropimage (thumbnails module)
-				if($this->fields->get($field)->type == "FieldtypeCropImage"){
+				if($this->fields->get($field)->type == "FieldtypeCropImage" && $subfield != ""){
 					if(count($v)){
 						$thumb_url = $v->first()->getThumb($subfield);
 						$thumb_url = $v->url . $this->resizeThumb($v, $thumb_url, $size);
