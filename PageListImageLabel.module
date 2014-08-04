@@ -41,7 +41,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 
 		return array(
 			'title' => 'Page List Image Label',
-			'version' => 103,
+			'version' => 104,
 			'summary' => 'Adds an thumbnail as label for pages. To enable add an image field to a page and add that to the advanced page label options in the template settings. You can output an thumbnail (Thumbnail Module) using dot notation (fieldname.thumbnailname)',
 			'autoload' => true
 			);
@@ -56,7 +56,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 
 		$event->replace = true;
 		$page = $event->arguments('page');
-		
+
 		//$event->return = $title;
 
 		$options = self::$defaults;
@@ -65,6 +65,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		}
 
 		$value = '';
+		$icon = '';
 
 		// if the page's template specifies a pageLabelField, use that
 		$pageLabelField = trim($page->template->pageLabelField);
@@ -79,11 +80,17 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		foreach($fields as $field) {
 
 			$has_thumb = false;
+			$subfield = '';
 
 			if(strpos($field, ".")) {
 				list($field, $subfield) = explode(".", $field);
-			} else $subfield = '';
-			
+			} else if(strpos($field, 'icon-') === 0 || strpos($field, 'fa-') === 0) {
+				$field = str_replace(array('icon-', 'fa-'), 'fa-', $field);
+				$field = $this->wire('sanitizer')->name($field);
+				if(!$icon) $icon = "<i class='icon fa $field'></i>";
+				continue;
+			}
+
 			// $page->of(false);
 			$v = $page->get($field);
 
@@ -110,7 +117,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 						$thumb_url = $v->getThumb($subfield);
 						$thumb_url = $v->url . $this->resizeThumb($v, $thumb_url, $size);
 					}
-					
+
 				} else { // all normal image fields
 					if($v instanceof WireArray && count($v)) {
 						$thumb_url = $page->$field->first()->size($size[0],$size[1])->url;
@@ -118,18 +125,18 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 						$thumb_url = $page->$field->size($size[0],$size[1])->url;
 					}
 				}
-				
+
 				if(strlen(trim($thumb_url))) {
 					$thumb_url .= "?vt=" . time();
 					$v = "<span class='label-image'{$styles}><img src='" . $thumb_url . "'/></span>";
-				} 
+				}
 				// else {
 				// 	$v = "<span class='label-image'{$styles}><span>" . $options['noImageText'] . "$thumb_url</span></span>";
 				// }
-				
+
 				$has_thumb = true;
 			}
-			
+
 			if($subfield && is_object($v)) {
 				if($v instanceof WireArray && count($v)) $v = $v->first();
 				$v = $v->get($subfield);
@@ -149,8 +156,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 
 		$value = strip_tags($value, '<img><span>');
 		//$value = htmlspecialchars($value, ENT_XHTML, "UTF-8", false);
-
-		$event->return = $value;
+		$event->return = $icon . trim($value);
 	}
 
 	private function resizeThumb($field, $thumb_url, $size){
