@@ -41,7 +41,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 
 		return array(
 			'title' => 'Page List Image Label',
-			'version' => 104,
+			'version' => 105,
 			'summary' => 'Adds an thumbnail as label for pages. To enable add an image field to a page and add that to the advanced page label options in the template settings. You can output an thumbnail (Thumbnail Module) using dot notation (fieldname.thumbnailname)',
 			'autoload' => true
 			);
@@ -56,6 +56,11 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 
 		$event->replace = true;
 		$page = $event->arguments('page');
+
+		if(isset($event->arguments[1]) && isset($event->arguments[1]['noTags']) && $event->arguments[1]['noTags']) {
+			$event->return = $page->title;
+			return;
+		}
 
 		//$event->return = $title;
 
