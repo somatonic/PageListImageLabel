@@ -57,7 +57,7 @@ class PageListImageLabel extends WireData implements Module,ConfigurableModule {
 		$event->replace = true;
 		$page = $event->arguments('page');
 
-		if(isset($event->arguments[1]) && $event->arguments[1]['noTags']) {
+		if(isset($event->arguments[1]) && isset($event->arguments[1]['noTags']) && $event->arguments[1]['noTags']) {
 			$event->return = $page->title;
 			return;
 		}
