@@ -1,3 +1,7 @@
+.PageListItem > a span.label-image + span:before {
+	content: none !important;
+}
+
 .label-image{
 	display:inline-block;
 	vertical-align:middle;
